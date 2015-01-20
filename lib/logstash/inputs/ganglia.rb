@@ -11,7 +11,6 @@ require "socket"
 #
 class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
   config_name "ganglia"
-  milestone 1
 
   default :codec, "plain"
 
