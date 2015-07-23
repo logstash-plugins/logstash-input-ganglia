@@ -112,22 +112,28 @@ class GmonPacket
   # Parsing a specific value of type
   # https://github.com/ganglia/monitor-core/blob/master/gmond/gmond.c#L1527
   def parse_value(type)
+	# We does not need to parse data by type because it receive data as string
+	# https://github.com/ganglia/monitor-core/blob/c74feb0e96d5a3efc3c788b37c113520234ab717/gmond/gmond.c#L1796
+	# https://github.com/ganglia/ganglia_contrib/blob/master/gmetric-python/gmetric.py#L138
+	# https://github.com/ganglia/ganglia_contrib/blob/master/gmetric-java/src/java/info/ganglia/metric/type/GMetricFloat.java#L97
+    local_value=@xdr.string
+
     value=:unknown
     case type
     when "int16"
-      value=@xdr.int16
+      value=local_value.to_i
     when "uint16"
-      value=@xdr.uint16
+      value=local_value.to_i
     when "uint32"
-      value=@xdr.uint32
+      value=local_value.to_i
     when "int32"
-      value=@xdr.int32
+      value=local_value.to_i
     when "float"
-      value=@xdr.float32
+      value=local_value.to_f
     when "double"
-      value=@xdr.float64
+      value=local_value.to_f
     when "string"
-      value=@xdr.string
+      value=local_value
     else
       #puts "Received unknown type #{type}"
     end
