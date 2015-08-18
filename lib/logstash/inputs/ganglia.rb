@@ -109,15 +109,11 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
 
       # Check if it was a valid data request
       return nil unless data
-
-      event=LogStash::Event.new
-
-      data["program"] = "ganglia"
-      event["log_host"] = data["hostname"]
+      props={ "program" => "ganglia", "log_host" => data["hostname"] }
       %w{dmax tmax slope type units}.each do |info|
-        event[info] = @metadata[data["name"]][info]
+        props[info] = @metadata[data["name"]][info]
       end
-      return event
+      return LogStash::Event.new(props)
     else
       # Skipping unknown packet types
       return nil
