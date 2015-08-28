@@ -1,7 +1,5 @@
 # encoding: utf-8
 require "date"
-require "logstash/filters/grok"
-require "logstash/filters/date"
 require "logstash/inputs/ganglia/gmondpacket"
 require "logstash/inputs/base"
 require "logstash/namespace"
