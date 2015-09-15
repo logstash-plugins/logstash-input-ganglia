@@ -13,6 +13,12 @@ describe LogStash::Inputs::Ganglia do
     expect { plugin.register }.to_not raise_error
   end
 
+  describe "when interrupting the plugin" do
+    it_behaves_like "an interruptible input plugin" do
+      let(:config) { {} }
+    end
+  end
+
   describe "connection" do
     let(:nevents)  { 10 }
     let(:port)     { rand(1000)+1025 }
