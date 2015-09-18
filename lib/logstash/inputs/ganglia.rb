@@ -32,7 +32,6 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
 
   public
   def run(output_queue)
-    @current_thread = Thread.current
     begin
       udp_listener(output_queue)
     rescue => e
