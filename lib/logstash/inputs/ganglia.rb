@@ -4,6 +4,7 @@ require "logstash/inputs/ganglia/gmondpacket"
 require "logstash/inputs/base"
 require "logstash/namespace"
 require "socket"
+require "stud/interval"
 
 # Read ganglia packets from the network via udp
 #
@@ -27,7 +28,6 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
 
   public
   def register
-    @sleep = false
   end # def register
 
   public
@@ -40,9 +40,7 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
         @logger.warn("ganglia udp listener died",
                      :address => "#{@host}:#{@port}", :exception => e,
         :backtrace => e.backtrace)
-        @sleep = true
-        sleep(5)
-        @sleep = false
+        Stud.stoppable_sleep(5)
         retry
       end
     end # begin
@@ -87,7 +85,7 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
   public
   def close
     super
-    @current_thread.wakeup if sleeping?
+    Stud.stop!
     close_udp
   end
 
@@ -97,11 +95,6 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
       @udp.close
       @udp = nil
     end
-  end
-
-  private
-  def sleeping?
-    @sleep
   end
 
   public
