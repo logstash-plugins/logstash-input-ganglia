@@ -40,7 +40,7 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
         @logger.warn("ganglia udp listener died",
                      :address => "#{@host}:#{@port}", :exception => e,
         :backtrace => e.backtrace)
-        Stud.stoppable_sleep(5)
+        Stud.stoppable_sleep(5) { stop? }
         retry
       end
     end # begin
@@ -85,7 +85,6 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
   public
   def close
     super
-    Stud.stop!
     close_udp
   end
 
