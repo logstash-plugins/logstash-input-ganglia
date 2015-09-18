@@ -21,7 +21,7 @@ describe LogStash::Inputs::Ganglia do
 
   describe "connection" do
     let(:nevents)  { 10 }
-    let(:port)     { rand(1000)+1025 }
+    let(:port)     { rand(1024..65532) }
 
     let(:conf) do
       <<-CONFIG
