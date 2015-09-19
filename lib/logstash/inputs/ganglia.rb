@@ -82,8 +82,7 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
   private
 
   public
-  def close
-    super
+  def stop
     close_udp
   end
 
