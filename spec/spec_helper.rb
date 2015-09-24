@@ -1,7 +1,7 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
 require "logstash/inputs/ganglia"
-require "support/client"
+require_relative "support/client"
 
 module GangliaHelpers
 
