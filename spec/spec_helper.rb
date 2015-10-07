@@ -11,7 +11,7 @@ module GangliaHelpers
     end
   end
 
-  def input(config, size, &block)
+  def self.input(config, size, &block)
     pipeline = LogStash::Pipeline.new(config)
     queue = Queue.new
 
@@ -41,8 +41,4 @@ module GangliaHelpers
     result
   end # def input
 
-end
-
-RSpec.configure do |c|
-  c.include GangliaHelpers
 end
