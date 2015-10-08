@@ -45,10 +45,9 @@ describe LogStash::Inputs::Ganglia do
     let(:client) { GangliaClient.new("0.0.0.0", port) }
 
     let(:events) do
-      input(conf, nevents) do
-        nevents.times do |value|
-          client.send(data)
-        end
+      input(conf) do |pipeline, queue|
+        nevents.times         { client.send(data) }
+        nevents.times.collect { queue.pop }
       end
     end
 
