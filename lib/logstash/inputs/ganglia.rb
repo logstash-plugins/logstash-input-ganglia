@@ -1,11 +1,10 @@
 # encoding: utf-8
 require "date"
-require "logstash/filters/grok"
-require "logstash/filters/date"
 require "logstash/inputs/ganglia/gmondpacket"
 require "logstash/inputs/base"
 require "logstash/namespace"
 require "socket"
+require "stud/interval"
 
 # Read ganglia packets from the network via udp
 #
@@ -24,7 +23,6 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
   public
   def initialize(params)
     super
-    @shutdown_requested = false
     BasicSocket.do_not_reverse_lookup = true
   end # def initialize
 
@@ -37,11 +35,11 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
     begin
       udp_listener(output_queue)
     rescue => e
-      if !@shutdown_requested
+      if !stop?
         @logger.warn("ganglia udp listener died",
                      :address => "#{@host}:#{@port}", :exception => e,
         :backtrace => e.backtrace)
-        sleep(5)
+        Stud.stoppable_sleep(5) { stop? }
         retry
       end
     end # begin
@@ -51,17 +49,24 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
   def udp_listener(output_queue)
     @logger.info("Starting ganglia udp listener", :address => "#{@host}:#{@port}")
 
-    if @udp
-      @udp.close_read
-      @udp.close_write
-    end
+    @udp.close if @udp
 
     @udp = UDPSocket.new(Socket::AF_INET)
     @udp.bind(@host, @port)
 
     @metadata = Hash.new if @metadata.nil?
-    loop do
-      packet, client = @udp.recvfrom(9000)
+    while !stop?
+      packet = ""
+      begin
+        packet, client = @udp.recvfrom_nonblock(9000)
+      rescue IO::WaitReadable
+       # The socket is still not active and readable so the
+       # read operation fails
+       packet = ""
+      end
+      # recvfrom_nonblock return packet == String.empty? when no data is in the buffers,
+      # we reused this same error code for IO:WaitReadable exception handler.
+      next if packet.empty?
       # TODO(sissel): make this a codec...
       e = parse_packet(packet)
       unless e.nil?
@@ -77,19 +82,16 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
   private
 
   public
-  def teardown
-    @shutdown_requested = true
+  def stop
     close_udp
-    finished
   end
 
   private
   def close_udp
     if @udp
-      @udp.close_read rescue nil
-      @udp.close_write rescue nil
+      @udp.close
+      @udp = nil
     end
-    @udp = nil
   end
 
   public
@@ -109,17 +111,11 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
 
       # Check if it was a valid data request
       return nil unless data
-
-      event=LogStash::Event.new
-
-      data["program"] = "ganglia"
-      event["log_host"] = data["hostname"]
-      event["name"] = data["name"]
-      event["val"] = data["val"]
+      props={ "program" => "ganglia", "log_host" => data["hostname"] }
       %w{dmax tmax slope type units}.each do |info|
-        event[info] = @metadata[data["name"]][info]
+        props[info] = @metadata[data["name"]][info]
       end
-      return event
+      return LogStash::Event.new(props)
     else
       # Skipping unknown packet types
       return nil
