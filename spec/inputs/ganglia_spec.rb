@@ -36,7 +36,7 @@ describe LogStash::Inputs::Ganglia do
       {  :name => 'pageviews',
          :units => 'req/min',
          :type => 'uint8',
-         :val => 7000,
+         :value => 7000,
          :tmax => 60,
          :dmax => 300,
          :group => 'test' }
@@ -66,7 +66,7 @@ describe LogStash::Inputs::Ganglia do
     end
 
     it "should receive the value" do
-      expect(event["val"]).to eq(7000)
+      expect(event["val"]).to eq('7000')
     end
 
   end
