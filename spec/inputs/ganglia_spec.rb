@@ -61,6 +61,10 @@ describe LogStash::Inputs::Ganglia do
       expect(event["tmax"]).to eq(60)
     end
 
+    it "should receive the correct data type" do
+      expect(event["type"]).to eq('uint8')
+    end
+
     it "should receive the name" do
       expect(event["name"]).to eq('pageviews')
     end
