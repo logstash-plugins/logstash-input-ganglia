@@ -58,7 +58,7 @@ describe LogStash::Inputs::Ganglia do
     end
 
     it "should receive the correct data" do
-      expect(event["tmax"]).to eq(60)
+      expect(event.get("tmax")).to eq(60)
     end
 
   end

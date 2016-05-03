@@ -71,7 +71,7 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
       e = parse_packet(packet)
       unless e.nil?
         decorate(e)
-        e["host"] = client[3] # the IP address
+        e.set("host", client[3]) # the IP address
         output_queue << e
       end
     end
