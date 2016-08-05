@@ -60,5 +60,17 @@ describe LogStash::Inputs::Ganglia do
     it "should receive the correct data" do
       expect(event.get("tmax")).to eq(60)
     end
+
+    it "should receive the correct data type" do
+      expect(event.get("type")).to eq('uint8')
+    end
+
+    it "should receive the name" do
+      expect(event.get("name")).to eq('pageviews')
+    end
+
+    it "should receive the value" do
+      expect(event.get("val")).to eq('7000')
+    end
   end
 end
