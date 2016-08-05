@@ -62,15 +62,15 @@ describe LogStash::Inputs::Ganglia do
     end
 
     it "should receive the correct data type" do
-      expect(event["type"]).to eq('uint8')
+      expect(event.get("type")).to eq('uint8')
     end
 
     it "should receive the name" do
-      expect(event["name"]).to eq('pageviews')
+      expect(event.get("name")).to eq('pageviews')
     end
 
     it "should receive the value" do
-      expect(event["val"]).to eq('7000')
+      expect(event.get("val")).to eq('7000')
     end
 
   end
