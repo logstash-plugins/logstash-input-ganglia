@@ -1,3 +1,6 @@
+## 3.1.0
+  - Store the name and value of ganglia metrics
+
 ## 3.0.2
   - Relax constraint on logstash-core-plugin-api to >= 1.60 <= 2.99
 
