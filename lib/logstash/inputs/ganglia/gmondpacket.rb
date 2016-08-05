@@ -20,12 +20,22 @@ class GmonPacket
     case type
     when 128
       @type=:meta
+	when 129
+      @type=:ushort
+    when 130
+      @type=:short
+    when 131
+      @type=:int
     when 132
-      @type=:heartbeat
-    when 133..134
-      @type=:data
+      @type=:uint
+    when 133
+      @type=:string
+    when 134
+      @type=:float
     when 135
-      @type=:gexec
+      @type=:double
+    when 136
+      @type=:meta_request
     else
       @type=:unknown
     end
@@ -36,7 +46,7 @@ class GmonPacket
   end
 
   def data?
-    @type == :data
+    [:ushort, :short, :int, :uint, :string, :float, :double].include? @type
   end
 
   def meta?
@@ -94,15 +104,7 @@ class GmonPacket
     data['spoof']=@xdr.uint32
     data['format']=@xdr.string
 
-    metrictype=name_to_type(metricname,metadata)
-
-    if metrictype.nil?
-      # Probably we got a data packet before a metadata packet
-      #puts "Received datapacket without metadata packet"
-      return nil
-    end
-
-    data['val']=parse_value(metrictype)
+    data['val']=parse_value(@type)
 
     # If we received a packet, last update was 0 time ago
     data['tn']=0
@@ -114,33 +116,24 @@ class GmonPacket
   def parse_value(type)
     value=:unknown
     case type
-    when "int16"
+    when :short
       value=@xdr.int16
-    when "uint16"
+    when :ushort
       value=@xdr.uint16
-    when "uint32"
-      value=@xdr.uint32
-    when "int32"
+    when :int
       value=@xdr.int32
-    when "float"
+    when :uint
+      value=@xdr.uint32
+    when :float
       value=@xdr.float32
-    when "double"
+    when :double
       value=@xdr.float64
-    when "string"
+    when :string
       value=@xdr.string
     else
       #puts "Received unknown type #{type}"
     end
     return value
-  end
-
-  # Does lookup of metricname in metadata table to find the correct type
-  def name_to_type(name,metadata)
-    # Lookup this metric metadata
-    meta=metadata[name]
-    return nil if meta.nil?
-
-    return meta['type']
   end
 
 end

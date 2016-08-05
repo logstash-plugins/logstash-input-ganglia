@@ -111,8 +111,9 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
 
       # Check if it was a valid data request
       return nil unless data
-      props={ "program" => "ganglia", "log_host" => data["hostname"] }
-      %w{dmax tmax slope type units}.each do |info|
+      props={ "program" => "ganglia", "log_host" => data["hostname"],
+              "val" => data["val"] }
+      %w{dmax tmax slope type units name}.each do |info|
         props[info] = @metadata[data["name"]][info]
       end
       return LogStash::Event.new(props)
