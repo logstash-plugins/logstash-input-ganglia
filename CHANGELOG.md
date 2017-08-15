@@ -1,3 +1,6 @@
+## 3.1.2
+  - Fix some documentation issues
+
 ## 3.1.0
   - Store the name and value of ganglia metrics
 
