@@ -47,7 +47,10 @@ describe LogStash::Inputs::Ganglia do
 
     let(:events) do
       input(conf) do |pipeline, queue|
-        nevents.times         { client.send(data) }
+        # This code race against the input's run method, so it could happen
+        # that's executed before the run method starts processing, and before an UDP socket
+        # is bound to a port and potentially could raise an Errno::ECONNREFUSED.
+        nevents.times { Stud.try(10.times) { client.send(data) } }
         nevents.times.collect { queue.pop }
       end
     end
