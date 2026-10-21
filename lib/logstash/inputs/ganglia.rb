@@ -88,10 +88,9 @@ class LogStash::Inputs::Ganglia < LogStash::Inputs::Base
 
   private
   def close_udp
-    if @udp
-      @udp.close
-      @udp = nil
-    end
+    # stop and the run thread's ensure may call this concurrently
+    udp, @udp = @udp, nil
+    udp.close if udp
   end
 
   public
